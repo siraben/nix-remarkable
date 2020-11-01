@@ -11,8 +11,9 @@ rec {
     lib = libraries;
     # This may lead to a missing libcxx, deal with that later
   } ''
-    mkdir -p $out
-    ln -s ${rm-toolchain}/sysroots/x86_64-oesdk-linux/usr/bin/arm-oe-linux-gnueabi $out/bin
+    mkdir -p $out/bin
+    ln -s ${rm-toolchain}/sysroots/x86_64-oesdk-linux/usr/bin/arm-oe-linux-gnueabi/* $out/bin
+    ln -s ${rm-toolchain}/sysroots/x86_64-oesdk-linux/usr/bin/qmake $out/bin
     mkdir -p $out/nix-support
   '';
   libraries = runCommand "rm-toolchain-libs" {

@@ -46,3 +46,11 @@ jobs:
       with:
         name: remarkable_news
         path: remarkable_news
+    - run: nix build --arg release true -f . rmPkgs.oxide
+    - name: "Copy oxide"
+      run: "mkdir oxide && cp -r result/* oxide && chmod +w -R oxide"
+    - name: "Upload artifact to github"
+      uses: actions/upload-artifact@v2
+      with:
+        name: oxide
+        path: oxide
