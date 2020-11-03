@@ -10,7 +10,7 @@
     kernel = lib.systems.parse.kernels.linux;
     abi = lib.systems.parse.abis.gnueabihf;
   };
-  config = "arm-oe-linux-gnueabi"; # doesn't really match oh well
+  config = "arm-unknown-linux-gnueabi"; # doesn't really match oh well
   system = "arm-linux";
   libc = "glibc";
   platform = {
@@ -38,7 +38,8 @@
     kernelArch = "arm";
     kernelMajor = "4.1";
     kernelBaseConfig = "zero-gravitas_defconfig";
-    kernelTarget = "zImage"; # unclear whether this is right. check device?
+    # Verified by checking /boot on device
+    kernelTarget = "zImage";
     kernelDTB = true;
     kernelAutoModules = false;
   };
