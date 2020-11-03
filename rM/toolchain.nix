@@ -1,5 +1,13 @@
 self: super: {
-  libcCrossChooser = super.libcCrossChooser;
+  rmToolchain = self.callPackage ./toolchain-pkgs.nix { };
 
+  libcCrossChooser = name:
+    builtins.trace name (if name == "glibc" &&
+                            self.targetPlatform.platform.name ==
+                              "zero-gravitas"
+                         then self.targetPackages.rmToolchain.libc or
+                           self.rmToolchain.libraries
+                         else super.libcCrossChooser name);
+  
   gcc = super.gcc;
 }

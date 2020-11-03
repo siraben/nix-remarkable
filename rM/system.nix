@@ -10,13 +10,12 @@
     kernel = lib.systems.parse.kernels.linux;
     abi = lib.systems.parse.abis.gnueabihf;
   };
-  config = "arm-unknown-linux-gnueabi"; # doesn't really match oh well
+  config = "arm-oe-linux-gnueabihf";
   system = "arm-linux";
   libc = "glibc";
   platform = {
     name = "zero-gravitas";
     gcc = {
-      arch = "armv7-a";
       # The default toolchain environment setup puts -mfloat-abi=hard
       # in $CC, which is somewhat important---anything that uses the
       # standard library from this toolchain _must_ be compiled

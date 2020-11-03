@@ -14,14 +14,14 @@ jobs:
       with:
         name: nix-remarkable
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-    - run: nix build --arg release true -f . rmPkgs.linuxPackages.mxc_epdc_fb_damage
-    - name: "Copy linuxPackages.mxc_epdc_fb_damage"
-      run: "mkdir mxc_epdc_fb_damage && cp -r result/* mxc_epdc_fb_damage && chmod +w -R mxc_epdc_fb_damage"
+    - run: nix build --arg release true -f . rmPkgs.hello
+    - name: "Copy rmPkgs.hello"
+      run: "mkdir hello && cp -r result/* hello && chmod +w -R hello"
     - name: "Upload artifact to github"
       uses: actions/upload-artifact@v2
       with:
-        name: mxc_epdc_fb_damage
-        path: mxc_epdc_fb_damage
+        name: hello
+        path: hello
     - run: nix build --arg release true -f . rmPkgs.rM-vnc-server
     - name: "Copy rmPkgs.rM-vnc-server"
       run: "mkdir rM-vnc-server && cp -r result/* rM-vnc-server && chmod +w -R rM-vnc-server && chmod +x -R rM-vnc-server"
