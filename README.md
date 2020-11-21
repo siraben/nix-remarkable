@@ -1,4 +1,4 @@
-# Nix cross-compilation to the reMarkable tablet
+# Cross-compilation to the reMarkable tablet using Nix
 
 ## Quick start
 Clone and navigate to this repository and run the following to
@@ -11,12 +11,21 @@ nix build --arg release true -f . rmPkgs.retris
 ```
 
 ## Description
-This repository consolidates Nix tooling for developing for the
-[reMarkable tablet](https://remarkable.com).
+This repository adapts [reMarkable's
+toolchain](http://remarkable.engineering/) to be compatible with Nix.
+The added benefits are;
 
-Currently, it includes both a nixpkgs cross configuration for the
-reMarkable, and Nix expressions for various tools, currently
-including:
+- cross-compiling up to 60,000+ additional packages from Nixpkgs
+- reproducible builds and deployment, check out the GitHub actions
+  artifacts in this repository
+- takes advantage of benefits from source and binary deployment by
+  using Nix and a binary cache
+- allows macOS users to cross-compile to the tablet when used in
+  conjunction with
+  [linuxkit-nix](https://github.com/nix-community/linuxkit-nix)
+
+Currently, it includes both a Nixpkgs cross configuration for the
+reMarkable, and Nix expressions for various tools, including
 - [appmarkable](https://github.com/LinusCDE/appmarkable)
 - [chessMarkable](https://github.com/LinusCDE/chessmarkable)
 - [evkill](https://github.com/Enteee/evkill)
