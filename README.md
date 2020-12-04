@@ -1,6 +1,46 @@
-# Cross-compilation to the reMarkable tablet using Nix
+# Nix cross-compilation to the reMarkable tablet
+**Note:**  The reMarkable 1 and 2 have been added as cross-compile
+targets to Nixpkgs.  As such, if you want to build things from source
+and not trust the company's toolchain, follow these instructions
 
-## Quick start
+## Cross-compiling using Nixpkgs infrastructure
+1. Ensure that your nixpkgs channel is up to date (or equivalent with
+   niv and flakes). You can check if it can cross-compile to
+   reMarkable 1 by running the following, replace with `remarkable2`
+   to check the same for reMarkable 2.
+
+```ShellSession
+$ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
+```
+2. Create a non-root user on the tablet, e.g. `useradd siraben &&
+   passwd siraben`.  Ensure that you have passwordless SSH set up by
+   using `ssh-copy-id`.
+
+3. The root partition on the  tablet has very limited space (22 MB),
+   so, as root, `mkdir -p /nix /opt/nix && mount --bind /opt/nix
+   /nix`. The bind can be made persistent by adding the following line
+   to `/etc/fstab`
+
+```
+/opt/nix /nix none bind,nofail 0,0
+```
+4. Install Nix on the device. I used
+   https://github.com/DavHau/nix-on-armv7l and decompressed the
+   tarball in the releases and ran the install script.
+
+5. Using `nix-build` and `nix-copy-closure`, one can cross-build from
+   their machine and transfer it to the tablet, like so. The
+   `NIX_SSHOPTS` is needed because `nix` isn't available unless
+   `.profile` is sourced.
+
+
+```ShellSession
+$ NIX_SSHOPTS="source .profile;" nix-copy-closure --to siraben@10.11.99.1 "$(nix-build -f '<nixpkgs>' -A pkgs.pkgsCross.remarkable1.hello)"
+```
+
+Happy hacking!
+
+## Cross-compiling using reMarkable's toolchain
 Clone and navigate to this repository and run the following to
 cross-compile [retris](https://github.com/LinusCDE/retris) to the
 reMarkable tablet.  If you want to use the binary cache (recommended),
