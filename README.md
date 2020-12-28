@@ -35,7 +35,7 @@ $ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
 
 
 ```ShellSession
-$ NIX_SSHOPTS="source .profile;" nix-copy-closure --to siraben@10.11.99.1 "$(nix-build -f '<nixpkgs>' -A pkgs.pkgsCross.remarkable1.hello)"
+$ NIX_SSHOPTS="source .profile;" nix-copy-closure --to siraben@10.11.99.1 "$(nix-build '<nixpkgs>' -A pkgs.pkgsCross.remarkable1.hello)"
 ```
 
 Happy hacking!
