@@ -24,10 +24,13 @@ $ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
 ```
 /opt/nix /nix none bind,nofail 0,0
 ```
-4. Install Nix on the device. I used
-   https://github.com/DavHau/nix-on-armv7l and decompressed the
-   tarball in the releases and ran the install script.
-
+4. Install Nix on the device. To do this, fetch the latest 
+  armv7l-linux Nix build from https://hydra.nixos.org/jobset/nix/master,
+  then un-tar it (`tar -xf ...`) and run the installation script.
+  For the multi-user installation, you may have to upgrade busybox or
+  edit the script, as the flags provided to `head` in the script aren't
+  available on the default binary available on the reMarkable.
+  
 5. Using `nix-build` and `nix-copy-closure`, one can cross-build from
    their machine and transfer it to the tablet, like so. The
    `NIX_SSHOPTS` is needed because `nix` isn't available unless
