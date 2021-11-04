@@ -65,7 +65,7 @@ The added benefits are;
   using Nix and a binary cache
 - allows macOS users to cross-compile to the tablet when used in
   conjunction with
-  [linuxkit-nix](https://github.com/nix-community/linuxkit-nix)
+  [nix-docker](https://github.com/LnL7/nix-docker)
 
 Currently, it includes both a Nixpkgs cross configuration for the
 reMarkable, and Nix expressions for various tools, including
