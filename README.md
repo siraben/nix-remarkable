@@ -44,11 +44,10 @@ $ echo "export PATH=/opt/bin:/opt/sbin:\$PATH" >> /home/siraben/.profile
 
 4. The root partition on the  tablet has very limited space (22 MB),
    so, as root, `mkdir -p /nix /opt/nix && mount --bind /opt/nix
-   /nix`. The bind can be made persistent by adding the following line
-   to `/etc/fstab`
+   /nix`. The bind can be made persistent by using the following
 
-```
-/opt/nix /nix none bind,nofail 0,0
+```ShellSession
+$ echo "/opt/nix             /nix                 none       bind,nofail           0,0" >> /etc/fstab
 ```
 
 5. Install Nix on the device. To do this, fetch the latest
