@@ -33,7 +33,7 @@ $ /opt/bin/opkg install coreutils-install coreutils-cp sudo
 $ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
 ```
 
-3. Create a non-root user on the tablet, e.g. `useradd siraben &&
+3. Create a non-root user on the tablet, e.g. `useradd -G root siraben &&
    passwd siraben`.  Ensure that you have passwordless SSH set up by
    using `ssh-copy-id`. Add yourself to the sudoers file and make `opkg`
    installed packages directly available to the user.
