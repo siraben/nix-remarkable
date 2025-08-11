@@ -52,7 +52,14 @@ $ echo "/opt/nix             /nix                 none       bind,nofail        
 
 5. Install Nix on the device. To do this, fetch the latest
   armv7l-linux Nix build from https://hydra.nixos.org/jobset/nix/master,
-  then un-tar it (`tar -xf ...`) and run the installation script.
+  then un-tar it (`tar -xf ...`) and run the installation script as your newly
+  created user.
+  If the script yields an `unable to load seccomp BPF program: Invalid argument`
+  error, you can try running
+```ShellSession
+$ mkdir -p ~/.config/nix
+$ echo "filter-syscalls = false" >> ~/.config/nix/nix.conf
+```
   For the multi-user installation, you may have to upgrade busybox or
   edit the script, as the flags provided to `head` in the script aren't
   available on the default binary available on the reMarkable.
