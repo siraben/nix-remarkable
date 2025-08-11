@@ -4,7 +4,27 @@ targets to Nixpkgs.  As such, if you want to build things from source
 and not trust the company's toolchain, follow these instructions
 
 ## Cross-compiling using Nixpkgs infrastructure
-1. Ensure that your nixpkgs channel is up to date (or equivalent with
+1. For the Nix installer to work, a few requirements need to be met, in
+  particular having the `sudo`, `install`, and a specific version of`cp`.
+  Leverage `opkg` to easily install these.
+  a. Make sure `/opt` have enough space.
+```ShellSession
+$ rm -rf /opt
+$ mkdir /opt
+$ mount --bind opt /opt
+$ echo "/home/root/opt       /opt                 none       bind,nofail           0,0" >> /etc/fstab
+```
+  b. Get `opkg` through a well supported installer.
+```ShellSession
+$ wget https://bin.entware.net/armv7sf-k3.2/installer/generic.sh && sh generic.sh
+```
+  c. Download requirements.
+```ShellSession
+$ /opt/bin/opkg update
+$ /opt/bin/opkg install coreutils-install coreutils-cp sudo
+```
+
+2. Ensure that your nixpkgs channel is up to date (or equivalent with
    niv and flakes). You can check if it can cross-compile to
    reMarkable 1 by running the following, replace with `remarkable2`
    to check the same for reMarkable 2.
@@ -12,11 +32,17 @@ and not trust the company's toolchain, follow these instructions
 ```ShellSession
 $ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
 ```
-2. Create a non-root user on the tablet, e.g. `useradd siraben &&
-   passwd siraben`.  Ensure that you have passwordless SSH set up by
-   using `ssh-copy-id`.
 
-3. The root partition on the  tablet has very limited space (22 MB),
+3. Create a non-root user on the tablet, e.g. `useradd siraben &&
+   passwd siraben`.  Ensure that you have passwordless SSH set up by
+   using `ssh-copy-id`. Add yourself to the sudoers file and make `opkg`
+   installed packages directly available to the user.
+```ShellSession
+$ sed -i 's@# %sudo@%sudo@' /opt/etc/sudoers
+$ echo "export PATH=/opt/bin:/opt/sbin:\$PATH" >> /home/siraben/.profile
+```
+
+4. The root partition on the  tablet has very limited space (22 MB),
    so, as root, `mkdir -p /nix /opt/nix && mount --bind /opt/nix
    /nix`. The bind can be made persistent by adding the following line
    to `/etc/fstab`
@@ -24,14 +50,15 @@ $ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
 ```
 /opt/nix /nix none bind,nofail 0,0
 ```
-4. Install Nix on the device. To do this, fetch the latest 
+
+5. Install Nix on the device. To do this, fetch the latest
   armv7l-linux Nix build from https://hydra.nixos.org/jobset/nix/master,
   then un-tar it (`tar -xf ...`) and run the installation script.
   For the multi-user installation, you may have to upgrade busybox or
   edit the script, as the flags provided to `head` in the script aren't
   available on the default binary available on the reMarkable.
   
-5. Using `nix-build` and `nix-copy-closure`, one can cross-build from
+6. Using `nix-build` and `nix-copy-closure`, one can cross-build from
    their machine and transfer it to the tablet, like so. The
    `NIX_SSHOPTS` is needed because `nix` isn't available unless
    `.profile` is sourced.
