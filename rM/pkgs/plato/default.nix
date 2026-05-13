@@ -1,19 +1,17 @@
-{ stdenv, callPackage, makeRustPlatform, fetchFromGitHub }:
-
-
-let mozillaOverlay = fetchFromGitHub {
-      owner = "mozilla";
-      repo = "nixpkgs-mozilla";
-      rev = "8c007b60731c07dd7a052cce508de3bb1ae849b4";
-      sha256 = "1zybp62zz0h077zm2zmqs2wcg3whg6jqaah9hcl1gv4x8af4zhs6";
-    };
-    mozilla = callPackage "${mozillaOverlay.out}/package-set.nix" {};
-    rustSpecific = (mozilla.rustChannelOf { date = "2020-10-27"; channel = "nightly"; }).rust;
-    rustPlatform = makeRustPlatform {
-      cargo = rustSpecific;
-      rustc = rustSpecific;
-    };
-in
+{ lib
+, rustPlatform
+, fetchFromGitHub
+, bzip2
+, djvulibre
+, freetype
+, harfbuzz
+, jbig2dec
+, libjpeg
+, libpng
+, mupdf
+, openjpeg
+, zlib
+}:
 
 rustPlatform.buildRustPackage rec {
   pname = "plato";
@@ -31,9 +29,66 @@ rustPlatform.buildRustPackage rec {
     rm .cargo/config
   '';
 
-  cargoSha256 = "1zk7la8qg1glryk945jqpzc3h3m4z2dpk4cvixfbq7g5dc6mpn57";
+  cargoLock = {
+    lockFileContents = builtins.readFile "${src}/Cargo.lock";
+    outputHashes = {
+      "libremarkable-0.4.1" = "sha256-PDDvHtFgHuTH8Fj0gXBqT05/QPZ92EQYJ4vmFRg9LzY=";
+    };
+  };
 
-  meta = with stdenv.lib; {
+  buildInputs = [
+    bzip2
+    djvulibre
+    freetype
+    harfbuzz
+    jbig2dec
+    libjpeg
+    libpng
+    mupdf
+    openjpeg
+    zlib
+  ];
+
+  preBuild = ''
+    (
+      cd src/mupdf_wrapper
+      TARGET_OS=Kobo CFLAGS="$CFLAGS -I${mupdf.dev}/include" ./build.sh
+    )
+
+    for serialize in $(find .. -path '*/rustc-serialize-0.3.24/src/serialize.rs'); do
+      substituteInPlace "$serialize" \
+        --replace-fail "impl<'a, T: ?Sized> Decodable for Cow<'a, T>" \
+                       "impl<'a, T: ?Sized + 'static> Decodable for Cow<'a, T>"
+    done
+
+    for rustFile in $(find .. \( -path '*/num-bigint-*/src/*.rs' -o -path '*/num-complex-*/src/*.rs' -o -path '*/num-rational-*/src/*.rs' \)); do
+      if grep -q 'feature = "rustc-serialize"' "$rustFile"; then
+        substituteInPlace "$rustFile" \
+          --replace-fail 'feature = "rustc-serialize"' 'feature = "disabled-rustc-serialize"'
+      fi
+    done
+
+    for atomicFile in $(find .. -path '*/atomic-*/src/lib.rs'); do
+      if grep -q 'feature = "nightly"' "$atomicFile"; then
+        substituteInPlace "$atomicFile" \
+          --replace-fail 'feature = "nightly"' 'feature = "disabled-nightly"'
+      fi
+    done
+
+    for libremarkableFile in $(find .. -path '*/libremarkable-*/src/lib.rs'); do
+      sed -i '/^#!\[feature(/d' "$libremarkableFile"
+    done
+
+    for appctxFile in $(find .. -path '*/libremarkable-*/src/appctx.rs'); do
+      if grep -q 'box core::Framebuffer::new("/dev/fb0")' "$appctxFile"; then
+        substituteInPlace "$appctxFile" \
+          --replace-fail 'box core::Framebuffer::new("/dev/fb0")' \
+                         'Box::new(core::Framebuffer::new("/dev/fb0"))'
+      fi
+    done
+  '';
+
+  meta = with lib; {
     description = "Port of the Plato reader for the reMarkable tablet";
     homepage = "https://github.com/LinusCDE/plato";
     license = licenses.mit;

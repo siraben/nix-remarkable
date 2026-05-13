@@ -1,16 +1,19 @@
-release: _nixpkgs:
+{ release ? false
+, nixpkgs ? <nixpkgs>
+, system ? "x86_64-linux"
+}:
 
 let
-  bootPkgs = import _nixpkgs {};
+  bootPkgs = import nixpkgs { inherit system; };
 
-  nixpkgs = if release then bootPkgs.fetchFromGitHub {
+  selectedNixpkgs = if release then bootPkgs.fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
     # nixpkgs-unstable 2020-11-29
     rev = "db103e0f98d461f3e66cd68702492afca0810db5";
     sha256 = "19gz926nqv7ggq281mv2qi1ah6a5slg2vvhsvc5jdnkp28m8f55k";
-  } else _nixpkgs;
-in with import nixpkgs {}; let
+  } else nixpkgs;
+in with import selectedNixpkgs { inherit system; }; let
   upstreamOrLocal = name: ghArgs:
     let path = ./pkgs + ("/" + name) + /derivation.nix; in
     if !release && builtins.pathExists path
@@ -20,7 +23,7 @@ in with import nixpkgs {}; let
 in
 
 {
-  inherit nixpkgs;
+  nixpkgs = selectedNixpkgs;
 
   mxc_epdc_fb_damage = upstreamOrLocal "mxc_epdc_fb_damage" {
     owner = "peter-sa";

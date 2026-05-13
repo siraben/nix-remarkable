@@ -1,19 +1,22 @@
 srcs: self: super:
 
 {
-  linuxPackages_remarkable = super.linuxPackages_remarkable.extend
+  linuxPackages = super.linuxPackages.extend
     (selflp: superlp: {
-      mxc_epdc_fb_damage = selflp.callPackage srcs.mxc_epdc_fb_damage.drv {};
+      mxc_epdc_fb_damage = selflp.callPackage srcs.mxc_epdc_fb_damage.drv {
+        stdenv = selflp.stdenv // {
+          hostPlatform = selflp.stdenv.hostPlatform // {
+            platform = (selflp.stdenv.hostPlatform.platform or {}) // {
+              kernelArch = "arm";
+            };
+          };
+        };
+      };
     });
   appmarkable = self.callPackage ./pkgs/appmarkable {};
   chessmarkable = self.callPackage ./pkgs/chessmarkable {};
   evkill = self.callPackage ./pkgs/evkill {};
-  # Need to figure out how to cross-compile Rust nightly
-  plato = self.callPackage ./pkgs/plato {
-    makeRustPlatform = super.pkgs.makeRustPlatform;
-    callPackage = super.pkgs.callPackage;
-    fetchFromGitHub = super.pkgs.fetchFromGitHub;
-  };
+  plato = self.callPackage ./pkgs/plato {};
   rM-vnc-server = self.callPackage srcs.rM-vnc-server.drv {};
   remarkable-fractals = self.callPackage ./pkgs/remarkable-fractals {};
   remarkable_news = self.callPackage ./pkgs/remarkable_news {};

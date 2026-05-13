@@ -1,16 +1,18 @@
 # Nix cross-compilation to the reMarkable tablet
-**Note:**  The reMarkable 1 and 2 have been added as cross-compile
-targets to Nixpkgs.  As such, if you want to build things from source
-and not trust the company's toolchain, follow these instructions
+This flake builds on the reMarkable cross-compile targets that are now
+in Nixpkgs. Package sets for both devices are exposed as
+`rm1Pkgs.<package>` and `rm2Pkgs.<package>` flake attributes, and the
+overlay extends `pkgsCross.remarkable1` and `pkgsCross.remarkable2`
+instead of carrying a separate reMarkable SDK toolchain.
 
 ## Cross-compiling using Nixpkgs infrastructure
-1. Ensure that your nixpkgs channel is up to date (or equivalent with
-   niv and flakes). You can check if it can cross-compile to
-   reMarkable 1 by running the following, replace with `remarkable2`
-   to check the same for reMarkable 2.
+1. Ensure that your nixpkgs channel is up to date. This repository's
+   flake pins `nixpkgs-unstable`; non-flake users need a nixpkgs with
+   `pkgsCross.remarkable1` and `pkgsCross.remarkable2`.
 
 ```ShellSession
-$ nix eval -f '<nixpkgs>' 'lib.systems.examples.remarkable1'
+$ nix eval -f '<nixpkgs>' 'pkgsCross.remarkable1.stdenv.hostPlatform.config'
+$ nix eval -f '<nixpkgs>' 'pkgsCross.remarkable2.stdenv.hostPlatform.config'
 ```
 2. Create a non-root user on the tablet, e.g. `useradd siraben &&
    passwd siraben`.  Ensure that you have passwordless SSH set up by
@@ -43,20 +45,21 @@ $ NIX_SSHOPTS="source .profile;" nix-copy-closure --to siraben@10.11.99.1 "$(nix
 
 Happy hacking!
 
-## Cross-compiling using reMarkable's toolchain
+## Building This Repository
 Clone and navigate to this repository and run the following to
-cross-compile [retris](https://github.com/LinusCDE/retris) to the
-reMarkable tablet.  If you want to use the binary cache (recommended),
-run `cachix use nix-remarkable` first.
+cross-compile [retris](https://github.com/LinusCDE/retris) to each
+tablet generation. If you want to use the binary cache, run
+`cachix use nix-remarkable` first.
 
 ```sh
-nix build --arg release true -f . rmPkgs.retris
+nix build .#rm1Pkgs.retris
+nix build .#rm2Pkgs.retris
 ```
 
 ## Description
-This repository adapts [reMarkable's
-toolchain](http://remarkable.engineering/) to be compatible with Nix.
-The added benefits are;
+This repository carries Nix expressions for reMarkable tools and uses
+Nixpkgs' reMarkable cross infrastructure to build them. The added
+benefits are:
 
 - cross-compiling up to 60,000+ additional packages from Nixpkgs
 - reproducible builds and deployment, check out the GitHub actions
@@ -67,8 +70,7 @@ The added benefits are;
   conjunction with
   [nix-docker](https://github.com/LnL7/nix-docker)
 
-Currently, it includes both a Nixpkgs cross configuration for the
-reMarkable, and Nix expressions for various tools, including
+Currently, it includes Nix expressions for various tools, including:
 - [appmarkable](https://github.com/LinusCDE/appmarkable)
 - [chessMarkable](https://github.com/LinusCDE/chessmarkable)
 - [evkill](https://github.com/Enteee/evkill)
@@ -85,23 +87,29 @@ To build a local copy of the above packages, create a `pkgs/`
 directory, clone the relevant repository into it, and run `nix build`
 in the resulting subdirectory.
 
-To build release copies of any of the projects, run `nix build --arg
-release true -f . <attribute path>` from this repo (without needing to
-manually download anything else), where `<attribute path>` is one of:
+To build release copies of any of the projects, run `nix build
+.#<attribute>` from this repo. The flake exposes:
 - `hostPkgs.gst-libvncclient-rfbsrc`
-- `rmPkgs.appmarkable`
-- `rmPkgs.chessmarkable`
-- `rmPkgs.evkill`
-- `rmPkgs.linuxPackages.mxc_epdc_fb_damage`
-- `rmPkgs.plato`
-- `rmPkgs.rM-vnc-server`
-- `rmPkgs.remarkable-fractals`
-- `rmPkgs.remarkable_news`
-- `rmPkgs.retris`
-- `rmPkgs.rm-video-player`
+- `rm1Pkgs.appmarkable`
+- `rm1Pkgs.chessmarkable`
+- `rm1Pkgs.evkill`
+- `rm1Pkgs.plato`
+- `rm1Pkgs.rM-vnc-server`
+- `rm1Pkgs.remarkable-fractals`
+- `rm1Pkgs.remarkable_news`
+- `rm1Pkgs.retris`
+- `rm1Pkgs.rm-video-player`
+- `rm2Pkgs.appmarkable`
+- `rm2Pkgs.chessmarkable`
+- `rm2Pkgs.evkill`
+- `rm2Pkgs.plato`
+- `rm2Pkgs.rM-vnc-server`
+- `rm2Pkgs.remarkable-fractals`
+- `rm2Pkgs.remarkable_news`
+- `rm2Pkgs.retris`
+- `rm2Pkgs.rm-video-player`
 
 To develop your own packages for the reMarkable, use the `rmPkgs`
-attribute of the set computed in [default.nix](./default.nix) as a
-`nixpkgs` appropriately configured for cross-compilation (e.g. its
-`stdenv.mkDerivation` will generate derivations that cross-build for
-the reMarkable).
+attribute of the set computed in [default.nix](./default.nix) for
+reMarkable 1 compatibility, or use `rm1Pkgs` and `rm2Pkgs` explicitly
+when the target generation matters.
