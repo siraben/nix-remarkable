@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      CACHIX_SIGNING_KEY: ${{ secrets.CACHIX_SIGNING_KEY }}
     strategy:
       fail-fast: false
       matrix:
@@ -51,12 +49,6 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-
-      - uses: cachix/cachix-action@v17
-        if: env.CACHIX_SIGNING_KEY != ''
-        with:
-          name: nix-remarkable
-          signingKey: ${{ secrets.CACHIX_SIGNING_KEY }}
 
       - name: Build ${{ matrix.attr }}
         id: build
