@@ -19,7 +19,7 @@ rustPlatform.buildRustPackage rec {
   cargoLock = {
     lockFileContents = builtins.readFile "${src}/Cargo.lock";
     outputHashes = {
-      "libremarkable-0.4.1" = "sha256-9iEAW5SReeaUBfn/GP/J0SDZp+xmkzDiLjBPrUZtKK4=";
+      "libremarkable-0.4.1" = "sha256-sHaKH/MPatDyCBXh02nJ6j3zDqnSpssyo4qKOnW+de0=";
     };
   };
 
