@@ -6,7 +6,10 @@
 }:
 
 let
-  pkgs = import nixpkgs { inherit system; };
+  pkgs = import nixpkgs {
+    inherit system;
+    config.gitConfigFile = ./nix-gitconfig;
+  };
   rmOverlay = import ./rM/packages.nix srcs;
 in
 rec {
